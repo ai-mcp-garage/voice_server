@@ -9,6 +9,28 @@ A high-performance, modular Text-to-Speech (TTS) server designed for low-latency
 - 🔌 **Modular Backends**: Run multiple TTS backends (Kokoro, VibeVoice, Chatterbox) in isolated environments.
 - 🛠️ **CLI & Client**: Includes a robust CLI for testing and a Python client example.
 
+## Advanced Features
+
+### 🗣️ Voice Cloning
+You can clone any voice by simply dropping an audio file (`.wav`, `.mp3`, `.flac`) into the `voice_server/voice_samples/` directory. 
+
+- **Supported Backends:** `chatterbox`
+- **Usage:** The filename becomes the voice ID.
+  - Example: Drop `obama.wav` into `voice_samples/`.
+  - Run: `uv run cli.py --backend chatterbox --voice obama --text "Hello there."`
+
+### 🎭 Paralinguistic Support
+The **Chatterbox** backend supports rich emotional expression tags within the text:
+
+- `[laugh]`, `[chuckle]`, `[sigh]`, `[cough]`, `[throat]`, `[sneeze]`, `[sniff]`
+- **Example:** `"I can't believe it! [laugh] That's hilarious."`
+
+### ⚡ Worker Pool (Parallel Generation)
+This server implements a **backend worker pool** to solve the "sentence latency" problem. 
+- While Sentence 1 is playing, Sentence 2 is already generating in a background process.
+- This ensures **zero-gap playback** even for heavy models.
+- Configurable pool size via `--pool-size N`.
+
 ## Installation
 
 This project is managed with `uv`.
