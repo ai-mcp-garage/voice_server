@@ -31,6 +31,20 @@ This server implements a **backend worker pool** to solve the "sentence latency"
 - This ensures **zero-gap playback** even for heavy models.
 - Configurable pool size via `--pool-size N`.
 
+## Architecture & Extensibility
+
+### 🧩 Isolated Backends
+Each TTS backend runs in its own **isolated subprocess** with its own virtual environment. 
+- **No Dependency Conflicts**: You can run one backend that needs `torch==2.0` and another that needs `torch==2.5` side-by-side.
+- **Stability**: If a backend crashes, it doesn't bring down the server.
+
+### 🔌 Easy to Extend
+Adding a new TTS engine is simple:
+1. Create a folder in `.../tts_backends/` (outside this repo).
+2. Create an adapter in `voice_server/backends/my_backend.py`.
+3. Register it in `backends.yaml`.
+The server handles the process management, IPC, and HTTP/WebSocket wrapping automatically.
+
 ## Installation
 
 This project is managed with `uv`.
