@@ -1,0 +1,13 @@
+# TTS Backend Configuration
+# Each backend specifies its external path and venv location
+
+backends:
+  kokoro:
+    path: ../tts_backends/kokoro
+    module: kokoro  # module name to import
+  chatterbox:
+    path: ../tts_backends/chatterbox
+    module: chatterbox
+  vibevoice:
+    path: ../tts_backends/vibevoice
+    module: vibevoice

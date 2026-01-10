@@ -1,0 +1,1 @@
+Place any voice samples in wav, mpg, ogg, etc here. They will show up as voices for your backends that support cloning.
