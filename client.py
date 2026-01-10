@@ -27,18 +27,22 @@ This ensures there are no pauses between sentences!
 Let's see if it can handle a longer stream of thought without stuttering.
 """
 
-async def stream_audio(uri, text, voice="af_heart", speed=1.0):
+async def stream_audio(uri, text, voice="af_heart", opts=None):
+    if opts is None:
+        opts = {}
+        
     async with websockets.connect(uri) as websocket:
         print(f"[client] Connected to {uri}")
         
         # 1. Send configuration
         await websocket.send(json.dumps({
             "voice": voice,
-            "opts": {"speed": speed}
+            "opts": opts
         }))
         
         # 2. Setup audio playback
-        # Default Kokoro sample rate is 24000
+        # Default Kokoro sample rate is 24000, others might vary but server sends raw chunks
+        # Ideally we fetch sample rate from server but protocol simpler for now
         output_stream = sd.OutputStream(channels=1, samplerate=24000, dtype='float32')
         output_stream.start()
         
@@ -51,7 +55,8 @@ async def stream_audio(uri, text, voice="af_heart", speed=1.0):
             
             for i, token in enumerate(tokens):
                 # Send token (with trailing space usually)
-                msg = {"token": token + " "}
+                what_to_send = token + " "
+                msg = {"token": what_to_send}
                 await websocket.send(json.dumps(msg))
                 
                 # Simulate LLM generation time
@@ -105,16 +110,38 @@ async def stream_audio(uri, text, voice="af_heart", speed=1.0):
         output_stream.stop()
         output_stream.close()
 
+def parse_opt(opt: str) -> tuple[str, any]:
+    """Parse key=value option, auto-converting types."""
+    if "=" not in opt:
+        return opt, True
+    key, val = opt.split("=", 1)
+    try:
+        if "." in val:
+            return key, float(val)
+        return key, int(val)
+    except ValueError:
+        if val.lower() in ("true", "yes", "1"):
+            return key, True
+        if val.lower() in ("false", "no", "0"):
+            return key, False
+        return key, val
+
 def main():
     parser = argparse.ArgumentParser(description="Voice Server Client")
     parser.add_argument("--url", default="ws://localhost:8000/stream-tokens", help="Server WebSocket URL")
     parser.add_argument("--text", default=DEMO_TEXT, help="Text to stream")
     parser.add_argument("--voice", default="af_heart", help="Voice ID")
-    parser.add_argument("--speed", type=float, default=1.0, help="Speech speed")
+    parser.add_argument("--opt", action="append", default=[], help="Backend options (key=value)")
     args = parser.parse_args()
 
+    # Parse options
+    opts = {}
+    for opt in args.opt:
+        k, v = parse_opt(opt)
+        opts[k] = v
+
     try:
-        asyncio.run(stream_audio(args.url, args.text, args.voice, args.speed))
+        asyncio.run(stream_audio(args.url, args.text, args.voice, opts))
     except KeyboardInterrupt:
         print("\n[client] Interrupted.")
     except Exception as e:

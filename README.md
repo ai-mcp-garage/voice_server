@@ -89,6 +89,9 @@ Run the example client to connect to the WebSocket server:
 
 ```bash
 uv run client.py --url ws://localhost:8000/stream-tokens
+
+# With options
+uv run client.py --opt speed=1.2
 ```
 
 ## API
