@@ -8,3 +8,4 @@ output.wav
 voice_samples/*
 !voice_samples/*.md
 uv.lock
+test.wav

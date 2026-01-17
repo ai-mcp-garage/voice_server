@@ -11,3 +11,6 @@ backends:
   vibevoice:
     path: ../tts_backends/vibevoice
     module: vibevoice
+  glm_tts:
+    path: ../tts_backends/GLM-TTS
+    module: glm_tts
